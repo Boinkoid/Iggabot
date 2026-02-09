@@ -78,20 +78,21 @@ public class Main{
 			    commands.forEach(command -> command.delete().queue());
 			});
 			guild.updateCommands().addCommands(
+					//Leaderboard
 					Commands.slash("board", "Leaderboard"),
-
+					//Money transfer
 					Commands.slash("pay", "Pay coins")
 					.addOption(OptionType.USER,"user", "target", true)
 					.addOption(OptionType.STRING, "amount", "coins", true),
-						
+					//Gambling
 					Commands.slash("dice", "Play dice")
-					.addOption(OptionType.STRING, "bet", "bet amount", false)
-					.addOption(OptionType.INTEGER, "sides", "dice sides", false)
-					.addOption(OptionType.INTEGER, "guess", "your guess", false),
-					
+					.addOption(OptionType.STRING, "bet", "bet amount", true)
+					.addOption(OptionType.INTEGER, "sides", "dice sides", true)
+					.addOption(OptionType.INTEGER, "guess", "your guess", true),
+					//Goon command
 					Commands.slash("goon","Goons")/*,
 					
-					Commands.slash("blackjack","Play Blackjack"),
+					
 					
 					Commands.slash("flip","Coin Flips")
 					.addOption(OptionType.STRING, "bet", "bet amount", false)
