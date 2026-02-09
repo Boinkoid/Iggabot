@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import logic.Main;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class SteamLink {
@@ -31,7 +32,7 @@ public class SteamLink {
 			write = new BufferedWriter(new FileWriter(file));
 
 			for(String i = read.readLine(); i != null; i = read.readLine()) {
-				ArrayList<String> games = new ArrayList();
+				ArrayList<String> games = new ArrayList<>();
 				String[] guh = i.split(":")[1].split("+947+");
 				String[] var7 = guh;
 				int var6 = guh.length;
@@ -49,11 +50,23 @@ public class SteamLink {
 		}
 
 	}
-
+	public int unlink(String user) {
+		int buh = 2;
+		if(user!=null) {
+			for(int i = 0;i<profile.size();i++) {
+				if(profile.get(i).getDiscName().equals(user)) {
+					buh = 0;
+				} else {
+					buh = 1;
+				}
+			}
+		} 
+		return buh;
+	}
 	public void link(String user) {
 		if (user != null) {
 			boolean guh = false;
-			Iterator var4 = this.profile.iterator();
+			Iterator<Profile> var4 = this.profile.iterator();
 
 			while(var4.hasNext()) {
 				Profile p = (Profile)var4.next();
@@ -65,7 +78,7 @@ public class SteamLink {
 			if (guh) {
 				try {
 					String buh = "";
-					Iterator var5 = this.profile.iterator();
+					Iterator<Profile> var5 = this.profile.iterator();
 
 					while(var5.hasNext()) {
 						Profile p = (Profile)var5.next();

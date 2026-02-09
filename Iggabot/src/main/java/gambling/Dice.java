@@ -71,9 +71,20 @@ public class Dice {
         savePot();
         return win;
     }
-
+    public synchronized void setDicePayout(String stuff) {
+    	System.out.println(stuff);
+    	String one = stuff.split("/")[0];
+    	String two = stuff.split("/")[1];
+    	System.out.println(one + "\n" + two);
+    	oddTop = Integer.parseInt(one);
+    	oddBot = Integer.parseInt(two);
+    }
+    public synchronized void getDicePayout() {
+    	System.out.println(oddTop + "/" + oddBot);
+    }
     /* ================= SLASH HANDLER ================= */
-
+    int oddTop = 6;
+    int oddBot = 4;
     public void handle(SlashCommandInteractionEvent event) {
 
         int sides = event.getOption("sides", 6, OptionMapping::getAsInt);
@@ -109,7 +120,7 @@ public class Dice {
 
         // Resolve
         if (win) {
-            BigInteger winnings = bet.multiply(BigInteger.valueOf(2));
+            BigInteger winnings = bet.multiply(BigInteger.valueOf(6)).divide(BigInteger.valueOf(4));
             BigInteger jackpot = drainPot();
 
             event.reply(

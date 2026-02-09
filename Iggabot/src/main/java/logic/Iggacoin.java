@@ -31,6 +31,11 @@ public class Iggacoin {
             if (!COIN_FILE.exists()) {
                 COIN_FILE.getParentFile().mkdirs();
                 COIN_FILE.createNewFile();
+                try(BufferedWriter write = new BufferedWriter(new FileWriter(COIN_FILE))){
+                	Main.guild.getMembers().forEach(e->{
+                		
+                	});
+                }
                 return;
             }
 

@@ -28,16 +28,17 @@ public class SlashRouter extends ListenerAdapter{
 	}
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-
+		Member m = event.getMember();	
+		VoiceChannel vc = (VoiceChannel) m.getVoiceState().getChannel();
 		switch (event.getName()) {
 
-		case "dice": 
+		case "dice " -> { 
 			dice.handle(event);
-			break;
-		case "board":
+		}
+		case "board " -> {
 			event.reply(bank.getLeaderboard()).queue();
-			break;
-		case "pay":
+		}
+		case "pay " -> {
 			String from = event.getUser().getId();
 			String to = event.getOption("user").getAsUser().getId();
 			BigInteger amt = new BigInteger(event.getOption("amount").getAsString());
@@ -47,30 +48,27 @@ public class SlashRouter extends ListenerAdapter{
 			} else {
 				event.reply("Not enough funds.").setEphemeral(true).queue();
 			}
-			break;
-		case "play":
-			Member m = event.getMember();
+		}
+		case "play " -> {
 			if (m == null || m.getVoiceState() == null || m.getVoiceState().getChannel() == null) {
 				event.reply("Join a voice channel first.").setEphemeral(true).queue();
 				return;
 			}
-
-			VoiceChannel vc = (VoiceChannel) m.getVoiceState().getChannel();
 			Music music = getMusic(event.getGuild().getIdLong(), event.getGuild());
 
 			music.connect(vc);
 			music.play(event.getOption("query").getAsString());
 
 			event.reply("Added to queue.").queue();
-			break;
-		case "tts" :
-			Member m = event.getMember();
+		}
+		case "tts" -> {
+
 			if (m == null || m.getVoiceState() == null || m.getVoiceState().getChannel() == null) {
 				event.reply("Join VC first.").setEphemeral(true).queue();
 				return;
 			}
 
-			VoiceChannel vc = (VoiceChannel) m.getVoiceState().getChannel();
+
 			Voice voice = getVoice(event.getGuild().getIdLong(), event.getGuild());
 
 			voice.say(
@@ -80,51 +78,51 @@ public class SlashRouter extends ListenerAdapter{
 					);
 
 			event.reply("Speaking...").setEphemeral(true).queue();
-			break;
-		case "goon":
+		}
+		case "goon" -> {
 			String tmp = "";
 			for(int i = 0;i<Main.maxGoon;i++) {
 				tmp += "goon";
 			}
 			Main.sendMessage(tmp,event.getChannel());
-			break;
-		/*case "" :
-		  
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		 	
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		 	
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		  
-		 	break;
-		 case "" :
-		 
-		 	break;
-		  */
+		}
+		case "link" -> {
+			
+		}
+		case "unlink" -> {
+
+		}
+		case "blackjack" -> {
+
+		}
+		case "" -> {
+
+		}
+		/*case "" -> {
+
+		 	 }
+		 case "" -> {
+
+		 	 }
+		 case "" -> {
+
+		 	 }
+		 case "" -> {
+
+		 	 }
+		 case "" -> {
+
+		 	 }
+		 case "" -> {
+
+		 	 }
+		 case "" -> {
+
+		 	 }
+		 case "" -> {
+
+		 	 }
+		 */
 		}
 	}
 }
