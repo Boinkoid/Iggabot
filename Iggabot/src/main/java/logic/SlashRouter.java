@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import steam.SteamLink;
 import net.dv8tion.jda.api.entities.User;
 
 import java.io.*;
@@ -16,8 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import Steam.SteamLink;
 import gambling.*;
+import music.Music;
+import music.Voice;
 
 public class SlashRouter extends ListenerAdapter{
 
@@ -100,42 +102,32 @@ public class SlashRouter extends ListenerAdapter{
 			event.reply(tmp).setEphemeral(true).queue();;
 		}
 		case "link" -> {
+		    event.deferReply(true).queue();
 
-		    String account =
-		    event.getOption("account",
-		    null,
-		    OptionMapping::getAsString);
+		    String steamInput = event.getOption("account").getAsString();
+		    String disc = event.getUser().getId();
 
-		    if(account == null || account.isBlank()) {
-		        event.reply("Provide a Steam profile.")
-		        .setEphemeral(true)
-		        .queue();
-		        return;
-		    }
-
-		    boolean ok =
-		    steam.link(
-		    event.getUser().getId(),
-		    account);
+		    boolean ok = steam.link(disc,steamInput);
 
 		    if(ok)
-		        event.reply("Steam linked.").setEphemeral(true)
-		        .queue();
+		        event.getHook().sendMessage("Steam linked").queue();
 		    else
-		        event.reply("Failed to link.").setEphemeral(true)
-		        .setEphemeral(true)
-		        .queue();
+		        event.getHook().sendMessage("Failed to link Steam").queue();
 		}
 		case "unlink" -> {
+		    event.deferReply(true).queue();
 
-			if(steam.unlink(event.getUser().getId()))
-				event.reply("🗑️ Steam unlinked.")
-				.setEphemeral(true).queue();
-			else
-				event.reply("❌ No Steam account linked.")
-				.setEphemeral(true).queue();
+		    boolean ok = steam.unlink(event.getUser().getId());
+
+		    if(ok)
+		        event.getHook().sendMessage("Steam unlinked").queue();
+		    else
+		        event.getHook().sendMessage("No link found").queue();
+
+
 		}
 		case "blackjack" -> {
+			event.reply("Not Implemented yet").setEphemeral(true).queue();;
 			new Blackjack();
 		}
 		case "coom" -> {
@@ -166,20 +158,24 @@ public class SlashRouter extends ListenerAdapter{
 			}
 		}
 		case "games" -> {
+		    event.deferReply().queue();
 
-		    List<User> users = new ArrayList<>();
+		    List<User> users=new ArrayList<>();
 
 		    for(int i=1;i<=25;i++){
-		        var opt = event.getOption("user"+i);
-		        if(opt!=null)
-		            users.add(opt.getAsUser());
+		        OptionMapping o=event.getOption("user"+i);
+		        if(o!=null&&o.getAsUser()!=null)
+		            users.add(o.getAsUser());
 		    }
 
-		    String game = steam.getRandomSharedGame(users);
+		    Integer app=steam.getRandomSharedGame(users);
 
-		    event.reply("🎮 Try playing: **"+game+"**").queue();
+		    if(app==null)
+		        event.getHook().sendMessage("No shared multiplayer games").queue();
+		    else
+		        event.getHook().sendMessage("https://store.steampowered.com/app/"+app).queue();
 		}
-
+		
 		/*case "" -> {
 
 		 	 }

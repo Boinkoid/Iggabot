@@ -1,5 +1,8 @@
 package logic;
 import gambling.Dice;
+import music.Music;
+import music.Voice;
+
 // Reader
 import java.io.*;
 import java.math.BigInteger;

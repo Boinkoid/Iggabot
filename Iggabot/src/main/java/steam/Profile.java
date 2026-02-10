@@ -1,4 +1,4 @@
-package Steam;
+package steam;
 
 import java.util.ArrayList;
 
