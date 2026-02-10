@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import logic.*;
 
 
-public class Blackjack {
-
+public class Blackjack{
+	
 	public ArrayList<Cards> cards = Cards.shuffle();
+	public ArrayList<Cards> dealer = new ArrayList<>(); 
+	public ArrayList<Cards> player = new ArrayList<>(); 
 	public Iggacoin $;
 	public BigInteger bet;
 	//Starts new Blackjack game

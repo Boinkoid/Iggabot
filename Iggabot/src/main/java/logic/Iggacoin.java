@@ -2,7 +2,7 @@ package logic;
 
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Iggacoin {
@@ -10,32 +10,24 @@ public class Iggacoin {
     private static final File COIN_FILE =
             new File("C:/Iggacorp Bot/Logs/Iggacoin.txt");
 
-    private static final File LEADERBOARD_FILE =
-            new File("C:/Iggacorp Bot/Logs/Leaderboard.txt");
-
-    // username -> wallet
-    private final ConcurrentHashMap<String, BigInteger> wallets =
+    // userid -> balance
+    private final ConcurrentHashMap<String, BigInteger> balances =
             new ConcurrentHashMap<>();
-    private final ArrayList<String> users = new ArrayList<>();
+
     public Iggacoin() {
         load();
-        Main.guild.getMembers().forEach(e -> {
-        	users.add(e.getUser().getName());
-        });
+        syncGuildMembers();
+        save();
     }
 
-    /* ================= LOAD / SAVE ================= */
+    /* ================= LOAD ================= */
 
     private synchronized void load() {
         try {
+
             if (!COIN_FILE.exists()) {
                 COIN_FILE.getParentFile().mkdirs();
                 COIN_FILE.createNewFile();
-                try(BufferedWriter write = new BufferedWriter(new FileWriter(COIN_FILE))){
-                	Main.guild.getMembers().forEach(e->{
-                		
-                	});
-                }
                 return;
             }
 
@@ -43,16 +35,22 @@ public class Iggacoin {
             String line;
 
             while ((line = br.readLine()) != null) {
-                // username:W1234
-                String[] parts = line.split(":");
-                if (parts.length != 2 || !parts[1].startsWith("W"))
+
+                if (!line.contains(":"))
                     continue;
 
-                wallets.put(
-                        parts[0],
-                        new BigInteger(parts[1].substring(1))
-                );
+                String[] parts = line.split(":");
+
+                if (parts.length < 2)
+                    continue;
+
+                try {
+                    balances.put(parts[0], new BigInteger(parts[1]));
+                } catch (Exception ignored) {
+                    System.out.println("Bad coin line skipped: " + line);
+                }
             }
+
             br.close();
 
         } catch (Exception e) {
@@ -60,77 +58,104 @@ public class Iggacoin {
         }
     }
 
+    /* ================= SAVE ================= */
+
     private synchronized void save() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(COIN_FILE))) {
-            for (var e : wallets.entrySet()) {
-                bw.write(e.getKey() + ":W" + e.getValue());
+
+        try (BufferedWriter bw =
+                     new BufferedWriter(new FileWriter(COIN_FILE))) {
+
+            for (var e : balances.entrySet()) {
+                bw.write(e.getKey() + ":" + e.getValue());
                 bw.newLine();
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        updateLeaderboard();
     }
 
-    /* ================= WALLET API ================= */
+    /* ================= MEMBER SYNC ================= */
 
-    public BigInteger getWallet(String user) {
-        return wallets.getOrDefault(user, BigInteger.ZERO);
+    private synchronized void syncGuildMembers() {
+
+        if (Main.guild == null)
+            return;
+
+        Main.guild.getMembers().forEach(m -> {
+
+            String id = m.getId();
+
+            balances.putIfAbsent(id, new BigInteger("1000"));
+        });
     }
 
-    public synchronized void addToWallet(String user, BigInteger amt) {
-        wallets.merge(user, amt, BigInteger::add);
+    /* ================= ECONOMY ================= */
+
+    public BigInteger getBalance(String userID) {
+        return balances.getOrDefault(userID, BigInteger.ZERO);
+    }
+
+    public synchronized void addCoins(String userID, BigInteger amt) {
+        balances.merge(userID, amt, BigInteger::add);
         save();
     }
 
-    public synchronized boolean subtractFromWallet(String user, BigInteger amt) {
-        BigInteger bal = getWallet(user);
+    public synchronized boolean subtractCoins(String userID, BigInteger amt) {
+
+        BigInteger bal = getBalance(userID);
+
         if (bal.compareTo(amt) < 0)
             return false;
 
-        wallets.put(user, bal.subtract(amt));
+        balances.put(userID, bal.subtract(amt));
         save();
         return true;
     }
 
-    public synchronized boolean transfer(String from, String to, BigInteger amt) {
-        if (!subtractFromWallet(from, amt))
+    public synchronized boolean transfer(
+            String fromID,
+            String toID,
+            BigInteger amt
+    ) {
+
+        if (!subtractCoins(fromID, amt))
             return false;
 
-        addToWallet(to, amt);
+        addCoins(toID, amt);
         return true;
     }
 
     /* ================= LEADERBOARD ================= */
-    ArrayList<BigInteger> tmp = new ArrayList<>();
+
     public synchronized String getLeaderboard() {
-    	try(BufferedReader read = new BufferedReader(new FileReader(LEADERBOARD_FILE))) {
-    	} catch(Exception e) {
-    		e.printStackTrace();
-    	}
-    	organize();
-    	String guh = "";
-    	
-    	
-    	
-    	
-    	return guh;
-    }
 
-    private void organize() {
-    	
-    	ArrayList<BigInteger> guh = new ArrayList<>();
-		for(int i = 0; i<tmp.size(); i++) {
-			
-		}
-	}
+        ArrayList<Map.Entry<String, BigInteger>> list =
+                new ArrayList<>(balances.entrySet());
 
-	private synchronized void updateLeaderboard() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(LEADERBOARD_FILE))) {
-            bw.write(getLeaderboard());
-        } catch (Exception e) {
-            e.printStackTrace();
+        list.sort((a,b) -> b.getValue().compareTo(a.getValue()));
+
+        StringBuilder sb = new StringBuilder();
+
+        for (var e : list) {
+
+            String name = e.getKey();
+
+            if (Main.guild != null &&
+                Main.guild.getMemberById(e.getKey()) != null) {
+
+                name = Main.guild
+                        .getMemberById(e.getKey())
+                        .getUser()
+                        .getName();
+            }
+
+            sb.append(name)
+              .append(" - ")
+              .append(e.getValue())
+              .append("\n");
         }
+
+        return sb.toString();
     }
 }
-

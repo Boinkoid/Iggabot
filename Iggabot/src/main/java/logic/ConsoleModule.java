@@ -5,12 +5,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -76,7 +76,12 @@ public class ConsoleModule extends Main{
 		});
 		System.setOut(ps);
 		System.setErr(ps);
-
+		try {
+			frame.setIconImage(ImageIO.read(new File("C:/Iggacorp Bot/SadTeto.jpg")));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		frame.setVisible(true);
 		System.out.println("Console ready.");
 	}
@@ -85,7 +90,7 @@ public class ConsoleModule extends Main{
 		SwingUtilities.invokeLater(() -> processCommand(cmd));
 	}
 
-	public static final String[] cmds = { "/exit", "/help", "/say", "/music", "/sing", "/music", "/setGoon", "/getDiceBigPot", "/getDiceSmallPot", "/setDiceBigPot", "/setDiceSmallPot", "/addDiceBigPot", "/addDiceSmallPot", "/setDicePayout", "/getDicePayout"};
+	public static final String[] cmds = { "/exit", "/help", "/say", "/music", "/sing", "/music", "/setGoon", "/getDiceBigPot", "/getDiceSmallPot", "/setDiceBigPot", "/setDiceSmallPot", "/addDiceBigPot", "/addDiceSmallPot", "/setDicePayout", "/getDicePayout", "/getSuggestions", "/delete"};
 	public static String txt;
 
 	private static void processCommand(String input) {
@@ -122,38 +127,88 @@ public class ConsoleModule extends Main{
 				setMaxGoon(in);
 				System.out.println(in);
 			} else if (input.startsWith(cmds[7])) { 
-			    txt = input.substring(cmds[7].length() + 1);
-			    System.out.println("Current Dice Jackpot is " + dice.getPot());
+				txt = input.substring(cmds[7].length() + 1);
+				System.out.println("Current Dice Jackpot is " + dice.getPot());
 
 			} else if (input.startsWith(cmds[8])) { 
-			    txt = input.substring(cmds[8].length() + 1);
-			    System.out.println("Current Dice Jackpot is " + dice.getPot());
+				txt = input.substring(cmds[8].length() + 1);
+				System.out.println("Current Dice Jackpot is " + dice.getPot());
 
 			} else if (input.startsWith(cmds[9])) { 
-			    txt = input.substring(cmds[9].length() + 1);
-			    dice.setPot(new BigInteger(txt));
-			    System.out.println("Current Dice Jackpot is " + dice.getPot());
+				txt = input.substring(cmds[9].length() + 1);
+				dice.setPot(new BigInteger(txt));
+				System.out.println("Current Dice Jackpot is " + dice.getPot());
 
 			} else if (input.startsWith(cmds[10])) {
-			    txt = input.substring(cmds[10].length() + 1);
-			    dice.setPot(new BigInteger(txt));
-			    System.out.println("Current Dice Jackpot is " + dice.getPot());
+				txt = input.substring(cmds[10].length() + 1);
+				dice.setPot(new BigInteger(txt));
+				System.out.println("Current Dice Jackpot is " + dice.getPot());
 
 			} else if (input.startsWith(cmds[11])) { 
-			    txt = input.substring(cmds[11].length() + 1);
-			    dice.addToPot(new BigInteger(txt));
-			    System.out.println("Current Dice Jackpot is " + dice.getPot());
+				txt = input.substring(cmds[11].length() + 1);
+				dice.addToPot(new BigInteger(txt));
+				System.out.println("Current Dice Jackpot is " + dice.getPot());
 
 			} else if (input.startsWith(cmds[12])) {
-			    txt = input.substring(cmds[12].length() + 1);
-			    dice.addToPot(new BigInteger(txt));
-			    System.out.println("Current Dice Jackpot is " + dice.getPot());
+				txt = input.substring(cmds[12].length() + 1);
+				dice.addToPot(new BigInteger(txt));
+				System.out.println("Current Dice Jackpot is " + dice.getPot());
 			} else if(input.startsWith(cmds[13])){
 				txt = input.substring(cmds[13].length() + 1);
 				dice.setDicePayout(txt);
 			} else if(input.startsWith(cmds[14])){
 				txt = input.substring(cmds[14].length() + 1);
 				dice.getDicePayout();
+			} else if(input.startsWith(cmds[15])){
+				try(BufferedReader r = new BufferedReader(new FileReader("C:/Iggacorp Bot/Logs/Suggestions.txt"))){
+					List<String> str = r.lines().toList();
+					if(str.size()<=0) {
+						System.out.println("No suggestions");
+					}
+					for(int i = 0; i<str.size(); i++) {
+						System.out.println((i+1) + ". " + str.get(i));
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else if(input.startsWith(cmds[16])){
+				txt = input.substring(cmds[16].length() + 1);
+				if(!txt.toLowerCase().contains("all")) {
+					try(BufferedReader r = new BufferedReader(new FileReader("C:/Iggacorp Bot/Logs/Suggestions.txt"))){
+						BufferedWriter w = new BufferedWriter(new FileWriter("C:/Iggacorp Bot/Logs/Suggestions.txt",true));
+						List<String> str = r.lines().toList();
+						ArrayList<String> tmp = new ArrayList<>();
+						for(int i = 0; i<str.size(); i++) {
+							if(!((i-1)==Integer.parseInt(txt))) {
+								tmp.add(str.get(i));
+							}
+						}
+						w.write("");
+						String[] temp = {""};
+						tmp.forEach(e->{
+							temp[0]+=e+"\n";
+						});
+						w.append(temp[0]);
+						w.flush();
+						List<String> string = r.lines().toList();
+						for(int i = 0; i<string.size(); i++) {
+							System.out.println((i+1) + ". " + string.get(i));
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				} else if(txt.toLowerCase().contains("all")) {
+					try(BufferedWriter w = new BufferedWriter(new FileWriter("C:/Iggacorp Bot/Logs/Suggestions.txt"))) {
+						
+						w.write("");
+						w.flush();
+						System.out.println("Cleared suggestions");
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				} else {
+					System.out.println("/delete arguements must be a number or all");
+				}
 			} else {
 				System.out.println("Command not recognized");
 			}

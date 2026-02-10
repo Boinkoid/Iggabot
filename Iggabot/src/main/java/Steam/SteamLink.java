@@ -1,115 +1,310 @@
 package Steam;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.*;
 
-import logic.Main;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class SteamLink {
-	static BufferedReader read;
-	static BufferedWriter write;
-	static File file = new File("C:/Iggacorp Bot/Logs/Steam.txt");
-	ArrayList<Profile> profile = new ArrayList<>();
 
-	public SteamLink() {
-		this.loadFiles();
-	}
+    private static final String API_KEY = "PUT_YOUR_STEAM_API_KEY_HERE";
 
-	public void pickGame(ArrayList<String> var1, SlashCommandInteractionEvent var2) {
-		throw new Error("Unresolved compilation problems: \n\tSlashCommandInteractionEvent cannot be resolved to a type\n\tMain cannot be resolved\n");
-	}
+    private static final File file =
+            new File("C:/Iggacorp Bot/Logs/Steam.txt");
 
-	public void loadFiles() {
-		try {
-			read = new BufferedReader(new FileReader(file));
-			write = new BufferedWriter(new FileWriter(file));
+    private final ArrayList<Profile> profile =
+            new ArrayList<>();
 
-			for(String i = read.readLine(); i != null; i = read.readLine()) {
-				ArrayList<String> games = new ArrayList<>();
-				String[] guh = i.split(":")[1].split("+947+");
-				String[] var7 = guh;
-				int var6 = guh.length;
+    public SteamLink(){
+        makeFile();
+        loadFiles();
+    }
 
-				for(int var5 = 0; var5 < var6; ++var5) {
-					String g = var7[var5];
-					games.add(g);
-				}
+    private void makeFile(){
+        try{
+            file.getParentFile().mkdirs();
+            if(!file.exists())
+                file.createNewFile();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
-				this.profile.add(new Profile(i.split("+957+")[0], i.split(":")[1], games));
-			}
-		} catch (Exception var8) {
-			var8.printStackTrace();
-			System.out.println("Steam Link got fucked");
-		}
+    // =========================
+    // FILE LOADING
+    // =========================
 
-	}
-	public int unlink(String user) {
-		int buh = 2;
-		if(user!=null) {
-			for(int i = 0;i<profile.size();i++) {
-				if(profile.get(i).getDiscName().equals(user)) {
-					buh = 0;
-				} else {
-					buh = 1;
-				}
-			}
-		} 
-		return buh;
-	}
-	public void link(String user) {
-		if (user != null) {
-			boolean guh = false;
-			Iterator<Profile> var4 = this.profile.iterator();
+    public void loadFiles(){
 
-			while(var4.hasNext()) {
-				Profile p = (Profile)var4.next();
-				if (p.getSteam().equals(this.resolve(user))) {
-					guh = true;
-				}
-			}
+        profile.clear();
 
-			if (guh) {
-				try {
-					String buh = "";
-					Iterator<Profile> var5 = this.profile.iterator();
+        try(BufferedReader read =
+                new BufferedReader(new FileReader(file))){
 
-					while(var5.hasNext()) {
-						Profile p = (Profile)var5.next();
-						ArrayList<String> bust = p.getGames();
+            String line;
 
-						for(int i = 0; i < bust.size(); ++i) {
-							if (i <= bust.size() - 1) {
-								buh = buh + (String)bust.get(i) + "+947+";
-							} else {
-								buh = buh + (String)bust.get(i);
-							}
-						}
-					}
+            while((line=read.readLine())!=null){
 
-					write.write("guhg");
-					write.flush();
-					this.loadFiles();
-				} catch (IOException var8) {
-					var8.printStackTrace();
-					System.out.println("Writer fucked writing");
-				}
-			} else {
-				System.out.println("User is already linked!");
-			}
-		} else {
-			System.out.println("User is null");
-		}
+                String[] split = line.split(":");
+                if(split.length<2) continue;
 
-	}
+                String disc = split[0];
+                String steam = split[1];
 
-	private String resolve(String user) {
-		return "";//Steam API = 8494A3B55BD2E5212AED68846410A2E3
-	}
+                profile.add(
+                        new Profile(disc,steam,new ArrayList<>())
+                );
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void save(){
+
+        try(BufferedWriter write =
+                new BufferedWriter(new FileWriter(file,false))){
+
+            for(Profile p:profile){
+
+                write.write(
+                        p.getDiscName()
+                        +":"+p.getSteam()
+                );
+
+                write.newLine();
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    // =========================
+    // LINK / UNLINK
+    // =========================
+
+    public void link(String discordID,String input){
+
+        String steamID = resolve(input);
+
+        if(steamID==null)
+            return;
+
+        unlink(discordID);
+
+        profile.add(
+                new Profile(discordID,steamID,new ArrayList<>())
+        );
+
+        save();
+    }
+
+    public void unlink(String discordID){
+
+        profile.removeIf(
+                p->p.getDiscName().equals(discordID)
+        );
+
+        save();
+    }
+
+    // =========================
+    // COMMAND: /games
+    // =========================
+
+    public void pickGame(
+            ArrayList<String> users,
+            SlashCommandInteractionEvent event){
+
+        try{
+
+            List<Set<String>> libraries =
+                    new ArrayList<>();
+
+            for(String u:users){
+
+                Profile p = find(u);
+                if(p==null) continue;
+
+                libraries.add(
+                        new HashSet<>(
+                                getOwnedGames(p.getSteam())
+                        )
+                );
+            }
+
+            if(libraries.isEmpty()){
+                event.reply("No linked users.")
+                     .setEphemeral(true).queue();
+                return;
+            }
+
+            Set<String> shared =
+                    new HashSet<>(libraries.get(0));
+
+            for(Set<String> s:libraries)
+                shared.retainAll(s);
+
+            if(shared.isEmpty()){
+                event.reply("No shared multiplayer games.")
+                     .queue();
+                return;
+            }
+
+            String[] arr =
+                    shared.toArray(new String[0]);
+
+            String pick =
+                    arr[new Random().nextInt(arr.length)];
+
+            event.reply("🎮 Play: **"+pick+"**").queue();
+
+        }catch(Exception e){
+            e.printStackTrace();
+            event.reply("Steam failed").queue();
+        }
+    }
+
+    private Profile find(String disc){
+        for(Profile p:profile)
+            if(p.getDiscName().equals(disc))
+                return p;
+        return null;
+    }
+
+    // =========================
+    // STEAM RESOLVE
+    // =========================
+
+    private String resolve(String input){
+
+        try{
+
+            // steam64 direct
+            if(input.matches("\\d{17}"))
+                return input;
+
+            // extract from url
+            if(input.contains("/profiles/"))
+                return input.split("/profiles/")[1]
+                        .split("/")[0];
+
+            // vanity url
+            if(input.contains("/id/"))
+                input=input.split("/id/")[1]
+                        .split("/")[0];
+
+            // friend code (simple convert)
+            if(input.matches("\\d+"))
+                return input;
+
+            // vanity lookup
+            String url =
+            "https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/"
+            +"?key="+API_KEY
+            +"&vanityurl="+input;
+
+            String json = readURL(url);
+
+            if(json.contains("steamid")){
+                return json.split("\"steamid\":\"")[1]
+                        .split("\"")[0];
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // =========================
+    // GET OWNED MULTIPLAYER GAMES
+    // =========================
+
+    private List<String> getOwnedGames(String steamID){
+
+        List<String> games=new ArrayList<>();
+
+        try{
+
+            String url =
+            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/"
+            +"?key="+API_KEY
+            +"&steamid="+steamID
+            +"&include_appinfo=true";
+
+            String json = readURL(url);
+
+            String[] names=json.split("\"name\":\"");
+            String[] ids=json.split("\"appid\":");
+
+            int idx=1;
+
+            for(int i=1;i<names.length;i++){
+
+                String name =
+                        names[i].split("\"")[0];
+
+                int appid =
+                        Integer.parseInt(
+                                ids[idx++].split(",")[0]);
+
+                if(isMultiplayer(appid))
+                    games.add(name);
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return games;
+    }
+
+    private boolean isMultiplayer(int appid){
+
+        try{
+
+            String json = readURL(
+            "https://store.steampowered.com/api/appdetails?appids="
+            +appid);
+
+            return json.contains("\"id\":1")
+                || json.contains("\"id\":9")
+                || json.contains("\"id\":38")
+                || json.contains("\"id\":24")
+                || json.contains("\"id\":27");
+
+        }catch(Exception e){
+            return false;
+        }
+    }
+
+    // =========================
+    // HTTP HELPER
+    // =========================
+
+    private String readURL(String urlStr)
+            throws Exception{
+
+        HttpURLConnection conn =
+                (HttpURLConnection)
+                        new URL(urlStr).openConnection();
+
+        BufferedReader br =
+                new BufferedReader(
+                        new InputStreamReader(
+                                conn.getInputStream()));
+
+        String out =
+                br.lines().reduce("",String::concat);
+
+        br.close();
+
+        return out;
+    }
 }

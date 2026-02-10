@@ -58,8 +58,7 @@ public class Main{
 		try (BufferedReader reader = new BufferedReader(new FileReader("C:/Iggacorp Bot/Logs/key.txt"))) {
 			bot = JDABuilder.createDefault(reader.readLine())
 					.enableIntents(GatewayIntent.MESSAGE_CONTENT)
-					.enableIntents(GatewayIntent.GUILD_MEMBERS)
-					.addEventListeners(new SlashRouter()).build();
+					.enableIntents(GatewayIntent.GUILD_MEMBERS).build();
 			bot.awaitReady(); // IMPORTANT
 
 			Optional<Guild> guildOpt = bot.getGuilds()
@@ -74,41 +73,74 @@ public class Main{
 			}
 
 			guild = guildOpt.get();
+			bot.addEventListener(new SlashRouter());
 			guild.retrieveCommands().queue(commands -> {
-			    commands.forEach(command -> command.delete().queue());
+				commands.forEach(command -> command.delete());
 			});
 			guild.updateCommands().addCommands(
-					//Leaderboard
+					// Leaderboard
 					Commands.slash("board", "Leaderboard"),
-					//Money transfer
+
+					// Money transfer
 					Commands.slash("pay", "Pay coins")
-					.addOption(OptionType.USER,"user", "target", true)
+					.addOption(OptionType.USER, "user", "target", true)
 					.addOption(OptionType.STRING, "amount", "coins", true),
-					//Gambling
+
+					// Gambling
 					Commands.slash("dice", "Play dice")
-					.addOption(OptionType.STRING, "bet", "bet amount", true)
+					.addOption(OptionType.INTEGER, "bet", "bet amount", true)
 					.addOption(OptionType.INTEGER, "sides", "dice sides", true)
-					.addOption(OptionType.INTEGER, "guess", "your guess", true),
-					//Goon command
-					Commands.slash("goon","Goons"),
-					//Steam
-					Commands.slash("link","Links your Steam Account")
+					.addOption(OptionType.STRING, "guess", "number OR even OR odd", true),
+
+					// Goon
+					Commands.slash("goon", "Goons"),
+
+					// Steam
+					Commands.slash("link", "Links your Steam Account")
 					.addOption(OptionType.STRING, "account", "friend code or account link", true),
-					
-					Commands.slash("unlink","Unlinks your Steam Account")/*,
+
+					Commands.slash("unlink", "Unlinks your Steam Account"),
+
+					Commands.slash("games", "Pick a shared game owned by everyone")
+				    .addOption(OptionType.USER, "user1", "user", true)
+				    .addOption(OptionType.USER, "user2", "user", true)
+				    .addOption(OptionType.USER, "user3", "user", false)
+				    .addOption(OptionType.USER, "user4", "user", false)
+				    .addOption(OptionType.USER, "user5", "user", false)
+				    .addOption(OptionType.USER, "user6", "user", false)
+				    .addOption(OptionType.USER, "user7", "user", false)
+				    .addOption(OptionType.USER, "user8", "user", false)
+				    .addOption(OptionType.USER, "user9", "user", false)
+				    .addOption(OptionType.USER, "user10", "user", false)
+				    .addOption(OptionType.USER, "user11", "user", false)
+				    .addOption(OptionType.USER, "user12", "user", false)
+				    .addOption(OptionType.USER, "user13", "user", false)
+				    .addOption(OptionType.USER, "user14", "user", false)
+				    .addOption(OptionType.USER, "user15", "user", false)
+				    .addOption(OptionType.USER, "user16", "user", false)
+				    .addOption(OptionType.USER, "user17", "user", false)
+				    .addOption(OptionType.USER, "user18", "user", false)
+				    .addOption(OptionType.USER, "user19", "user", false)
+				    .addOption(OptionType.USER, "user20", "user", false)
+				    .addOption(OptionType.USER, "user21", "user", false)
+				    .addOption(OptionType.USER, "user22", "user", false)
+				    .addOption(OptionType.USER, "user23", "user", false)
+				    .addOption(OptionType.USER, "user24", "user", false)
+				    .addOption(OptionType.USER, "user25", "user", false),
+				    
+					Commands.slash("coom", "Goodnight Coom"),
+
+					Commands.slash("suggest", "Make a suggestion")
+					.addOption(OptionType.STRING, "suggestion", "Help improve Iggabot", true)/*,
 
 					Commands.slash().addOption(),
-					
+
 					Commands.slash().addOption(),
-					
+
 					Commands.slash().addOption(),
-					
+
 					Commands.slash().addOption(),
-					
-					Commands.slash().addOption(),
-					
-					Commands.slash().addOption(),
-					
+
 					/* Commands.slash("play", "Play music")
 		            .addOption(OptionType.STRING, "query", "song/url", true),
 
@@ -116,9 +148,7 @@ public class Main{
 		            .addOption(OptionType.STRING, "text", "what to say", true)
 		            .addOption(OptionType.STRING, "voice", "voice model", true)*/
 					).queue();
-			
-
-
+			guild.updateCommands();
 		} catch (Exception e) {
 			ConsoleModule.killPS();
 			log += e.getStackTrace();
@@ -130,7 +160,6 @@ public class Main{
 		voice = new Voice(guild);
 		$ = new Iggacoin();
 		Syncer.start();
-
 	}
 
 	public static Music getMusicForVC(VoiceChannel vc) {
@@ -152,7 +181,7 @@ public class Main{
 		.getTextChannelsByName(channel, true).get(0).sendMessage(str).queue();
 	}
 
-	public static int maxGoon;
+	public static int maxGoon = 20;
 	public static void setMaxGoon(int i) {
 		maxGoon = i;
 	}
