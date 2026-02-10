@@ -158,8 +158,6 @@ public class SlashRouter extends ListenerAdapter{
 			}
 		}
 		case "games" -> {
-		    event.deferReply().queue();
-
 		    List<User> users=new ArrayList<>();
 
 		    for(int i=1;i<=25;i++){
@@ -168,12 +166,14 @@ public class SlashRouter extends ListenerAdapter{
 		            users.add(o.getAsUser());
 		    }
 
-		    Integer app=steam.getRandomSharedGame(users);
+		    String game = steam.getRandomSharedGame(users);
 
-		    if(app==null)
-		        event.getHook().sendMessage("No shared multiplayer games").queue();
-		    else
-		        event.getHook().sendMessage("https://store.steampowered.com/app/"+app).queue();
+		    if(game==null){
+		        event.reply("No shared multiplayer games found.").setEphemeral(true).queue();
+		    }else{
+		        event.reply("🎮 Shared Game: "+game).queue();
+		    }
+
 		}
 		
 		/*case "" -> {

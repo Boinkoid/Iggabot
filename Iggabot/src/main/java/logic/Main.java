@@ -10,6 +10,9 @@ import java.math.BigInteger;
 import java.net.*;
 // JFrame
 import javax.swing.*;
+
+import club.minnced.discord.jdave.interop.JDaveSessionFactory;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -61,7 +64,12 @@ public class Main{
 		try (BufferedReader reader = new BufferedReader(new FileReader("C:/Iggacorp Bot/Logs/key.txt"))) {
 			bot = JDABuilder.createDefault(reader.readLine())
 					.enableIntents(GatewayIntent.MESSAGE_CONTENT)
-					.enableIntents(GatewayIntent.GUILD_MEMBERS).build();
+					.enableIntents(GatewayIntent.GUILD_MEMBERS)
+					.setAudioModuleConfig(
+							  new AudioModuleConfig()
+							    .withDaveSessionFactory(new JDaveSessionFactory())
+							    .withAudioSendFactory(new NativeAudioSendFactory())
+							).build();
 			bot.awaitReady(); // IMPORTANT
 
 			Optional<Guild> guildOpt = bot.getGuilds()
