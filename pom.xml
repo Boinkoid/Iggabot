@@ -13,13 +13,18 @@
 
     <repositories>
         <repository>
-            <id>ll-releases</id>
-            <name>Lavalink Releases</name>
-            <url>https://maven.lavalink.dev/releases</url>
-        </repository>
+        	<id>arbjergDev-snapshots</id>
+        	<name>Lavalink Repository</name>
+        	<url>https://maven.lavalink.dev/snapshots</url>
+		</repository>
     </repositories>
 
     <dependencies>
+		<dependency>
+    		<groupId>club.minnced</groupId>
+    		<artifactId>jdave-api</artifactId>
+    		<version>0.1.6</version>
+		</dependency>
         <!-- JDA -->
         <dependency>
             <groupId>net.dv8tion</groupId>
@@ -33,13 +38,6 @@
  		   <artifactId>json</artifactId>
  		   <version>20231013</version>
 		</dependency>
-
-        <!-- Lavalink Client 4.x -->
-        <dependency>
-            <groupId>dev.arbjerg</groupId>
-            <artifactId>lavalink-client</artifactId>
-            <version>3.3.0</version>
-        </dependency>
 
         <!-- SLF4J -->
         <dependency>
