@@ -101,19 +101,31 @@ public class SlashRouter extends ListenerAdapter{
 		}
 		case "link" -> {
 
-			boolean ok =
-					steam.link(
-							event.getUser().getId(),
-							event.getOption("account").getAsString()
-							);
+		    String account =
+		    event.getOption("account",
+		    null,
+		    OptionMapping::getAsString);
 
-			if(ok)
-				event.reply("✅ Steam linked.").setEphemeral(true).queue();
-			else
-				event.reply("❌ Could not resolve Steam account.")
-				.setEphemeral(true).queue();
+		    if(account == null || account.isBlank()) {
+		        event.reply("Provide a Steam profile.")
+		        .setEphemeral(true)
+		        .queue();
+		        return;
+		    }
+
+		    boolean ok =
+		    steam.link(
+		    event.getUser().getId(),
+		    account);
+
+		    if(ok)
+		        event.reply("Steam linked.").setEphemeral(true)
+		        .queue();
+		    else
+		        event.reply("Failed to link.").setEphemeral(true)
+		        .setEphemeral(true)
+		        .queue();
 		}
-
 		case "unlink" -> {
 
 			if(steam.unlink(event.getUser().getId()))
@@ -188,6 +200,6 @@ public class SlashRouter extends ListenerAdapter{
 	}
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-
+		
 	}
 }
