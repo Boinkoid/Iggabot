@@ -3,21 +3,14 @@ import gambling.Dice;
 import music.Music;
 import music.Voice;
 
-// Reader
 import java.io.*;
-import java.math.BigInteger;
-// Networking
 import java.net.*;
-// JFrame
-import javax.swing.*;
-
-import club.minnced.discord.jdave.interop.JDaveSessionFactory;
-
-import java.awt.*;
-import java.awt.event.*;
 import java.util.*;
 import java.util.List;
-// JDA
+
+import dev.arbjerg.lavalink.client.LavalinkClient;
+import dev.arbjerg.lavalink.client.NodeOptions;
+import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -35,10 +28,10 @@ public class Main{
 	 * Installer https://discord.com/oauth2/authorize?client_id=1460785433314066566&
 	 * permissions=8&integration_type=0&scope=bot+applications.commands
 	 */
-
+	public static Music music;
 	public static final String guildName = "Testing";
 	private static Voice voice;
-	static JDA bot;
+	public static JDA bot;
 	public static int prompt = 0;
 	static String log = "";
 	public static ProcessBuilder pb;
@@ -47,6 +40,7 @@ public class Main{
 	static Guild guild; 
 	public static Dice dice;
 	public static void main(String[] args) {
+		SlashRouter r = new SlashRouter();
 		dice = new Dice();
 		System.setProperty("jna.library.path", ".");
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -65,11 +59,9 @@ public class Main{
 			bot = JDABuilder.createDefault(reader.readLine())
 					.enableIntents(GatewayIntent.MESSAGE_CONTENT)
 					.enableIntents(GatewayIntent.GUILD_MEMBERS)
-					.setAudioModuleConfig(
-							  new AudioModuleConfig()
-							    .withDaveSessionFactory(new JDaveSessionFactory())
-							    .withAudioSendFactory(new NativeAudioSendFactory())
-							).build();
+					/*.setAudioModuleConfig(new AudioModuleConfig()
+							.withAudioSendFactory(new NativeAudioSendFactory()))
+					*/.build();
 			bot.awaitReady(); // IMPORTANT
 
 			Optional<Guild> guildOpt = bot.getGuilds()
@@ -84,7 +76,7 @@ public class Main{
 			}
 
 			guild = guildOpt.get();
-			bot.addEventListener(new SlashRouter());
+			bot.addEventListener(r);
 			guild.retrieveCommands().queue(commands -> {
 				commands.forEach(command -> command.delete());
 			});
@@ -170,11 +162,9 @@ public class Main{
 		new ServerThread().start();
 		voice = new Voice(guild);
 		$ = new Iggacoin();
+		music = new Music();
 		Syncer.start();
-	}
-
-	public static Music getMusicForVC(VoiceChannel vc) {
-		return vcMusicMap.computeIfAbsent(vc.getIdLong(), id -> new Music(vc.getGuild()));
+		r.linkMusic();
 	}
 
 	private static final int limit = 2000;
@@ -197,14 +187,7 @@ public class Main{
 		maxGoon = i;
 	}
 
-	public void onReady(ReadyEvent event) {
-		List<Guild> guilds = bot.getGuildsByName(guildName, true);
-		if (!guilds.isEmpty()) {
-			new Music(guilds.get(0));
-			System.out.println("Music initialized for guild: " + guildName);
-		} else {
-			System.out.println("Guild not found: " + guildName);
-		}
+	public void onReady(ReadyEvent event) {		
 	}
 
 	public static String getVCS() {

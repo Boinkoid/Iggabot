@@ -6,39 +6,29 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import steam.SteamLink;
 import net.dv8tion.jda.api.entities.User;
 
 import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import gambling.*;
-import music.Music;
-import music.Voice;
-
+import music.*;
 public class SlashRouter extends ListenerAdapter{
 
 	private Iggacoin bank;
 	private SteamLink steam = new SteamLink();
 	private Dice dice = new Dice();
 	public final File SUGGESTION_FILE= new File("C:/Iggacorp Bot/Logs/Suggestions.txt");
-	private final Map<Long, Music> musicMap = new HashMap<>();
-	private final Map<Long, Voice> voiceMap = new HashMap<>();
-	private Music getMusic(long guildId, net.dv8tion.jda.api.entities.Guild g) {
-		return musicMap.computeIfAbsent(guildId, id -> new Music(g));
-	}
 
-	private Voice getVoice(long guildId, net.dv8tion.jda.api.entities.Guild g) {
-		return voiceMap.computeIfAbsent(guildId, id -> new Voice(g));
-	}
 	boolean guh = true;
 	Member m;
 	VoiceChannel vc;
+	private Music music;
+	public void linkMusic() {
+		music = Main.music;
+	}
 	@Override
 	public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 		if(guh) {
@@ -49,7 +39,7 @@ public class SlashRouter extends ListenerAdapter{
 
 		switch (event.getName()) {
 
-		case "dice" -> { 
+		case "dice" -> {
 			dice.handle(event);
 		}
 		case "pay" -> {
@@ -63,21 +53,9 @@ public class SlashRouter extends ListenerAdapter{
 				event.reply("Not enough funds.").setEphemeral(true).queue();
 			}
 		}
-		case "play" -> {
-			vc = (VoiceChannel) m.getVoiceState().getChannel();
-			if (m == null || m.getVoiceState() == null || m.getVoiceState().getChannel() == null) {
-				event.reply("Join a voice channel first.").setEphemeral(true).queue();
-				return;
-			}
-			Music music = getMusic(event.getGuild().getIdLong(), event.getGuild());
-
-			music.connect(vc);
-			music.play(event.getOption("query").getAsString());
-
-			event.reply("Added to queue.").queue();
-		}
 		case "tts" -> {
-			vc = (VoiceChannel) m.getVoiceState().getChannel();
+			event.reply("Not implemented yet. Igg needs to record his lines, bully him ab it").setEphemeral(true).queue();
+			/*vc = (VoiceChannel) m.getVoiceState().getChannel();
 			if (m == null || m.getVoiceState() == null || m.getVoiceState().getChannel() == null) {
 				event.reply("Join VC first.").setEphemeral(true).queue();
 				return;
@@ -92,7 +70,7 @@ public class SlashRouter extends ListenerAdapter{
 					vc
 					);
 
-			event.reply("Speaking...").setEphemeral(true).queue();
+			event.reply("Speaking...").setEphemeral(true).queue();*/
 		}
 		case "goon" -> {
 			String tmp = "";
@@ -102,27 +80,27 @@ public class SlashRouter extends ListenerAdapter{
 			event.reply(tmp).setEphemeral(true).queue();;
 		}
 		case "link" -> {
-		    event.deferReply(true).queue();
+			event.deferReply(true).queue();
 
-		    String steamInput = event.getOption("account").getAsString();
-		    String disc = event.getUser().getId();
+			String steamInput = event.getOption("account").getAsString();
+			String disc = event.getUser().getId();
 
-		    boolean ok = steam.link(disc,steamInput);
+			boolean ok = steam.link(disc,steamInput);
 
-		    if(ok)
-		        event.getHook().sendMessage("Steam linked").queue();
-		    else
-		        event.getHook().sendMessage("Failed to link Steam").queue();
+			if(ok)
+				event.getHook().sendMessage("Steam linked").queue();
+			else
+				event.getHook().sendMessage("Failed to link Steam").queue();
 		}
 		case "unlink" -> {
-		    event.deferReply(true).queue();
+			event.deferReply(true).queue();
 
-		    boolean ok = steam.unlink(event.getUser().getId());
+			boolean ok = steam.unlink(event.getUser().getId());
 
-		    if(ok)
-		        event.getHook().sendMessage("Steam unlinked").queue();
-		    else
-		        event.getHook().sendMessage("No link found").queue();
+			if(ok)
+				event.getHook().sendMessage("Steam unlinked").queue();
+			else
+				event.getHook().sendMessage("No link found").queue();
 
 
 		}
@@ -158,24 +136,33 @@ public class SlashRouter extends ListenerAdapter{
 			}
 		}
 		case "games" -> {
-		    List<User> users=new ArrayList<>();
+			List<User> users=new ArrayList<>();
 
-		    for(int i=1;i<=25;i++){
-		        OptionMapping o=event.getOption("user"+i);
-		        if(o!=null&&o.getAsUser()!=null)
-		            users.add(o.getAsUser());
-		    }
+			for(int i=1;i<=25;i++){
+				OptionMapping o=event.getOption("user"+i);
+				if(o!=null&&o.getAsUser()!=null)
+					users.add(o.getAsUser());
+			}
 
-		    String game = steam.getRandomSharedGame(users);
+			String game = steam.getRandomSharedGame(users);
 
-		    if(game==null){
-		        event.reply("No shared multiplayer games found.").setEphemeral(true).queue();
-		    }else{
-		        event.reply("🎮 Shared Game: "+game).queue();
-		    }
+			if(game==null){
+				event.reply("No shared multiplayer games found.").setEphemeral(true).queue();
+			}else{
+				event.reply("🎮 Shared Game: "+game).queue();
+			}
 
 		}
-		
+		//Music
+		case "play" -> {
+			/*if(m.getVoiceState()==null) {
+				event.reply("You have to be in a VC first!").queue();
+				return;
+			}
+			Main.bot.getDirectAudioController().connect(m.getVoiceState().getChannel());
+			music.play(event.getOptions().get(0).getAsString(), event);*/
+			event.reply("Not yet implemented").setEphemeral(true).queue();
+		}
 		/*case "" -> {
 
 		 	 }
@@ -196,6 +183,6 @@ public class SlashRouter extends ListenerAdapter{
 	}
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
-		
+
 	}
 }

@@ -1,50 +1,64 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.delta</groupId>
-    <artifactId>iggabot</artifactId>
-    <version>1.0</version>
+<modelVersion>4.0.0</modelVersion>
+<groupId>com.delta</groupId>
+<artifactId>iggabot</artifactId>
+<version>1.0</version>
 
-    <properties>
-        <maven.compiler.release>21</maven.compiler.release>
-    </properties>
+<properties>
+    <maven.compiler.release>21</maven.compiler.release>
+</properties>
 
-    <repositories>
-        <repository>
-        	<id>arbjergDev-snapshots</id>
-        	<name>Lavalink Repository</name>
-        	<url>https://maven.lavalink.dev/snapshots</url>
-		</repository>
-    </repositories>
+<repositories>
+    <repository>
+        <id>m2-dv8tion</id>
+        <url>https://m2.dv8tion.net/releases</url>
+    </repository>
+    <repository>
+        <id>ll-releases</id>
+        <name>Lavalink Releases</name>
+        <url>https://maven.lavalink.dev/releases</url>
+    </repository>
+	<repository>
+    	<id>jitpack</id>
+    	<url>https://jitpack.io</url>
+	</repository>
+</repositories>
 
-    <dependencies>
-		<dependency>
-    		<groupId>club.minnced</groupId>
-    		<artifactId>jdave-api</artifactId>
-    		<version>0.1.6</version>
-		</dependency>
-        <!-- JDA -->
-        <dependency>
-            <groupId>net.dv8tion</groupId>
-            <artifactId>JDA</artifactId>
-            <version>5.1.0</version>
-        </dependency>
-        
-        <!-- JSON-->
-		<dependency>
-    		<groupId>org.json</groupId>
- 		   <artifactId>json</artifactId>
- 		   <version>20231013</version>
-		</dependency>
+<dependencies>
+<dependency>
+  <groupId>dev.arbjerg</groupId>
+  <artifactId>lavalink-client</artifactId>
+  <version>3.3.0</version>
+</dependency>
 
-        <!-- SLF4J -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.12</version>
-        </dependency>
-    </dependencies>
+    <!-- Modern Lavaplayer -->
+    <dependency>
+        <groupId>dev.arbjerg</groupId>
+        <artifactId>lavaplayer</artifactId>
+        <version>2.2.2</version>
+    </dependency>
 
+    <!-- JDA -->
+    <dependency>
+        <groupId>net.dv8tion</groupId>
+        <artifactId>JDA</artifactId>
+        <version>6.3.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20231013</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>2.0.12</version>
+    </dependency>
+
+</dependencies>
 </project>
