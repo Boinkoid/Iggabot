@@ -8,9 +8,6 @@ import java.net.*;
 import java.util.*;
 import java.util.List;
 
-import dev.arbjerg.lavalink.client.LavalinkClient;
-import dev.arbjerg.lavalink.client.NodeOptions;
-import net.dv8tion.jda.api.audio.AudioModuleConfig;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;

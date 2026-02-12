@@ -79,7 +79,6 @@ public class ConsoleModule extends Main{
 		try {
 			frame.setIconImage(ImageIO.read(new File("C:/Iggacorp Bot/SadTeto.jpg")));
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		frame.setVisible(true);
@@ -174,8 +173,8 @@ public class ConsoleModule extends Main{
 			} else if(input.startsWith(cmds[16])){
 				txt = input.substring(cmds[16].length() + 1);
 				if(!txt.toLowerCase().contains("all")) {
-					try(BufferedReader r = new BufferedReader(new FileReader("C:/Iggacorp Bot/Logs/Suggestions.txt"))){
-						BufferedWriter w = new BufferedWriter(new FileWriter("C:/Iggacorp Bot/Logs/Suggestions.txt",true));
+					try(BufferedReader r = new BufferedReader(new FileReader("C:/Iggacorp Bot/Logs/Suggestions.txt"));
+						BufferedWriter w = new BufferedWriter(new FileWriter("C:/Iggacorp Bot/Logs/Suggestions.txt",true))){
 						List<String> str = r.lines().toList();
 						ArrayList<String> tmp = new ArrayList<>();
 						for(int i = 0; i<str.size(); i++) {
@@ -199,7 +198,6 @@ public class ConsoleModule extends Main{
 					}
 				} else if(txt.toLowerCase().contains("all")) {
 					try(BufferedWriter w = new BufferedWriter(new FileWriter("C:/Iggacorp Bot/Logs/Suggestions.txt"))) {
-						
 						w.write("");
 						w.flush();
 						System.out.println("Cleared suggestions");
